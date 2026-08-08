@@ -31,16 +31,16 @@ export async function getCustomerById(id: string) {
 
 export async function updateCustomer(
   id: string,
-  data: {
-    customerName: string;
-    mobile: string;
-    email?: string;
-    businessName: string;
-    gstNumber?: string;
-    customerType: "RETAIL" | "WHOLESALE" | "DISTRIBUTOR";
-    address: string;
-    status: "LEAD" | "ACTIVE" | "INACTIVE";
-  }
+  data: Partial<{
+  customerName: string;
+  mobile: string;
+  email?: string;
+  businessName: string;
+  gstNumber?: string;
+  customerType: "RETAIL" | "WHOLESALE" | "DISTRIBUTOR";
+  address: string;
+  status: "LEAD" | "ACTIVE" | "INACTIVE";
+}>
 ) {
   return await prisma.customer.update({
     where: { id },

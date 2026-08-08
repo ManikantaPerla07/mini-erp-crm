@@ -55,7 +55,7 @@ export async function getAll(req: Request, res: Response) {
 
 export async function getOne(req: Request, res: Response) {
   try {
-    const customer = await getCustomerById(req.params.id);
+    const customer = await getCustomerById(req.params.id as string as string);
 
     if (!customer) {
       return res.status(404).json({
@@ -83,7 +83,7 @@ export async function update(req: Request, res: Response) {
   try {
     const data = updateCustomerSchema.parse(req.body);
 
-    const customer = await updateCustomer(req.params.id, data);
+    const customer = await updateCustomer(req.params.id as string as string, data);
 
     return res.status(200).json({
       success: true,
@@ -102,7 +102,7 @@ export async function update(req: Request, res: Response) {
 
 export async function remove(req: Request, res: Response) {
   try {
-    await deleteCustomer(req.params.id);
+    await deleteCustomer(req.params.id as string as string);
 
     return res.status(200).json({
       success: true,

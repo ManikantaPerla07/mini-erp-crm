@@ -17,7 +17,7 @@ export async function create(req: Request, res: Response) {
 
     const followup = await createFollowup({
       ...data,
-      createdById: req.user.id,
+      createdById: req.user!.id,
     });
 
     return res.status(201).json({
@@ -43,7 +43,7 @@ export async function getAll(req: Request, res: Response) {
 }
 
 export async function getOne(req: Request, res: Response) {
-  const followup = await getFollowupById(req.params.id);
+  const followup = await getFollowupById(req.params.id as string as string);
 
   if (!followup) {
     return res.status(404).json({
@@ -62,7 +62,7 @@ export async function update(req: Request, res: Response) {
   try {
     const data = updateFollowupSchema.parse(req.body);
 
-    const followup = await updateFollowup(req.params.id, data);
+    const followup = await updateFollowup(req.params.id as string as string, data);
 
     return res.json({
       success: true,
@@ -78,7 +78,7 @@ export async function update(req: Request, res: Response) {
 }
 
 export async function remove(req: Request, res: Response) {
-  await deleteFollowup(req.params.id);
+  await deleteFollowup(req.params.id as string as string);
 
   return res.json({
     success: true,

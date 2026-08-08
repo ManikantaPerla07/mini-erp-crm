@@ -13,7 +13,14 @@ export async function createFollowup(data: {
     },
     include: {
       customer: true,
-      createdBy: true,
+      createdBy: {
+  select: {
+    id: true,
+    name: true,
+    email: true,
+    role: true,
+  },
+},
     },
   });
 }
@@ -22,7 +29,14 @@ export async function getAllFollowups() {
   return prisma.customerFollowUp.findMany({
     include: {
       customer: true,
-      createdBy: true,
+      createdBy: {
+  select: {
+    id: true,
+    name: true,
+    email: true,
+    role: true,
+  },
+},
     },
     orderBy: {
       followupDate: "asc",
@@ -35,7 +49,14 @@ export async function getFollowupById(id: string) {
     where: { id },
     include: {
       customer: true,
-      createdBy: true,
+      createdBy: {
+  select: {
+    id: true,
+    name: true,
+    email: true,
+    role: true,
+  },
+},
     },
   });
 }

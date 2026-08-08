@@ -15,7 +15,7 @@ export async function create(req: Request, res: Response) {
 
     const challan = await createChallan({
       ...data,
-      createdById: req.user.id,
+      createdById: req.user!.id,
     });
 
     return res.status(201).json({
@@ -43,7 +43,7 @@ export async function getAll(req: Request, res: Response) {
 }
 
 export async function getOne(req: Request, res: Response) {
-  const challan = await getChallanById(req.params.id);
+  const challan = await getChallanById(req.params.id as string as string);
 
   if (!challan) {
     return res.status(404).json({
@@ -59,7 +59,7 @@ export async function getOne(req: Request, res: Response) {
 }
 
 export async function remove(req: Request, res: Response) {
-  await deleteChallan(req.params.id);
+  await deleteChallan(req.params.id as string as string);
 
   return res.json({
     success: true,

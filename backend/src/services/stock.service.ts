@@ -50,7 +50,14 @@ export async function getStockMovements() {
   return prisma.stockMovement.findMany({
     include: {
       product: true,
-      createdBy: true,
+      createdBy: {
+  select: {
+    id: true,
+    name: true,
+    email: true,
+    role: true,
+  },
+},
     },
     orderBy: {
       createdAt: "desc",
@@ -65,7 +72,14 @@ export async function getStockMovementById(id: string) {
     },
     include: {
       product: true,
-      createdBy: true,
+      createdBy: {
+  select: {
+    id: true,
+    name: true,
+    email: true,
+    role: true,
+  },
+},
     },
   });
 }

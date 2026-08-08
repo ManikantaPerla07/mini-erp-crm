@@ -14,6 +14,7 @@ interface CreateChallanInput {
 
 export async function createChallan(data: CreateChallanInput) {
   return prisma.$transaction(async (tx) => {
+    console.log("Transaction started");
 
     const customer = await tx.customer.findUnique({
       where: {
@@ -99,7 +100,14 @@ export async function createChallan(data: CreateChallanInput) {
       include: {
         customer: true,
         items: true,
-        createdBy: true,
+        createdBy: {
+  select: {
+    id: true,
+    name: true,
+    email: true,
+    role: true,
+  },
+},
       },
     });
 
@@ -109,7 +117,14 @@ export async function getAllChallans() {
   return prisma.challan.findMany({
     include: {
       customer: true,
-      createdBy: true,
+      createdBy: {
+  select: {
+    id: true,
+    name: true,
+    email: true,
+    role: true,
+  },
+},
       items: true,
     },
     orderBy: {
@@ -125,16 +140,57 @@ export async function getChallanById(id: string) {
     },
     include: {
       customer: true,
-      createdBy: true,
+      createdBy: {
+  select: {
+    id: true,
+    name: true,
+    email: true,
+    role: true,
+  },
+},
       items: true,
     },
   });
 }
-
 export async function deleteChallan(id: string) {
-  return prisma.challan.delete({
-    where: {
-      id,
-    },
+  return prisma.$transaction(async (tx) => {
+
+    // Get challan with items
+    const challan = await tx.challan.findUnique({
+      where: { id },
+      include: { items: true },
+    });
+
+    if (!challan) {
+      throw new Error("Challan not found");
+    }
+
+    // Restore stock
+    for (const item of challan.items) {
+      await tx.product.update({
+        where: {
+          id: item.productId,
+        },
+        data: {
+          currentStock: {
+            increment: item.quantity,
+          },
+        },
+      });
+    }
+
+    // Delete child items
+    await tx.challanItem.deleteMany({
+      where: {
+        challanId: id,
+      },
+    });
+
+    // Delete challan
+    return tx.challan.delete({
+      where: {
+        id,
+      },
+    });
   });
 }

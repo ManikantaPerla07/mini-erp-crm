@@ -14,7 +14,7 @@ export async function create(req: Request, res: Response) {
 
     const stockMovement = await createStockMovement({
       ...data,
-      createdById: req.user.id,
+      createdById: req.user!.id,
     });
 
     return res.status(201).json({
@@ -48,7 +48,7 @@ export async function getAll(req: Request, res: Response) {
 
 export async function getOne(req: Request, res: Response) {
   try {
-    const stock = await getStockMovementById(req.params.id);
+    const stock = await getStockMovementById(req.params.id as string as string);
 
     if (!stock) {
       return res.status(404).json({

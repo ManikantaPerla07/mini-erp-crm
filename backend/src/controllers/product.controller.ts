@@ -63,7 +63,7 @@ export async function getAll(req: Request, res: Response) {
 
 export async function getOne(req: Request, res: Response) {
   try {
-    const product = await getProductById(req.params.id);
+    const product = await getProductById(req.params.id as string as string);
 
     if (!product) {
       return res.status(404).json({
@@ -88,7 +88,7 @@ export async function update(req: Request, res: Response) {
   try {
     const data = updateProductSchema.parse(req.body);
 
-    const product = await updateProduct(req.params.id, data);
+    const product = await updateProduct(req.params.id as string as string, data);
 
     return res.json({
       success: true,
@@ -107,7 +107,7 @@ export async function update(req: Request, res: Response) {
 
 export async function remove(req: Request, res: Response) {
   try {
-    await deleteProduct(req.params.id);
+    await deleteProduct(req.params.id as string as string);
 
     return res.json({
       success: true,

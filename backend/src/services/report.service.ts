@@ -39,7 +39,14 @@ export async function challanReport() {
   return prisma.challan.findMany({
     include: {
       customer: true,
-      createdBy: true,
+      createdBy: {
+  select: {
+    id: true,
+    name: true,
+    email: true,
+    role: true,
+  },
+},
       items: true,
     },
     orderBy: {

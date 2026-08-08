@@ -7,6 +7,7 @@ import stockRoutes from "./routes/stock.routes";
 import followupRoutes from "./routes/followup.routes";
 import challanRoutes from "./routes/challan.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
+import reportRoutes from "./routes/report.routes";
 const app = express();
 
 app.use(cors());
@@ -26,5 +27,6 @@ app.use("/api/stock", stockRoutes);
 app.use("/api/followups", followupRoutes);
 app.use("/api/challans", challanRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/reports", reportRoutes);
 
 export default app;

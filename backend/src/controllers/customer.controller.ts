@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 
 import {
+  createCustomerSchema,
+  updateCustomerSchema,
+} from "../validations/customer.validation";
+
+import {
   createCustomer,
   getCustomers,
   getCustomerById,
@@ -10,7 +15,9 @@ import {
 
 export async function create(req: Request, res: Response) {
   try {
-    const customer = await createCustomer(req.body);
+    const data = createCustomerSchema.parse(req.body);
+
+    const customer = await createCustomer(data);
 
     return res.status(201).json({
       success: true,
@@ -54,7 +61,9 @@ export async function getOne(req: Request, res: Response) {
 
 export async function update(req: Request, res: Response) {
   try {
-    const customer = await updateCustomer(req.params.id, req.body);
+    const data = updateCustomerSchema.parse(req.body);
+
+    const customer = await updateCustomer(req.params.id, data);
 
     return res.json({
       success: true,

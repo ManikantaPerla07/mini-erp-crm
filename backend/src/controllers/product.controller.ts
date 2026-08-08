@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 
 import {
+  createProductSchema,
+  updateProductSchema,
+} from "../validations/product.validation";
+
+import {
   createProduct,
   getProducts,
   getProductById,

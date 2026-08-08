@@ -4,21 +4,15 @@ interface CreateProductInput {
   name: string;
   sku: string;
   category: string;
-  price: number;
-  stock: number;
+  unitPrice: number;
+  currentStock: number;
+  minimumStock: number;
+  warehouseLocation: string;
 }
 
 export async function createProduct(data: CreateProductInput) {
   return prisma.product.create({
-    data: {
-      name: data.name,
-      sku: data.sku,
-      category: data.category,
-      unitPrice: data.price,
-      currentStock: data.stock,
-      minimumStock: 5,
-      warehouseLocation: "Main Warehouse",
-    },
+    data,
   });
 }
 
@@ -46,13 +40,7 @@ export async function updateProduct(
     where: {
       id,
     },
-    data: {
-      ...(data.name && { name: data.name }),
-      ...(data.sku && { sku: data.sku }),
-      ...(data.category && { category: data.category }),
-      ...(data.price !== undefined && { unitPrice: data.price }),
-      ...(data.stock !== undefined && { currentStock: data.stock }),
-    },
+    data,
   });
 }
 

@@ -1,19 +1,19 @@
 import { z } from "zod";
 
 export const createProductSchema = z.object({
-  name: z.string().min(2),
+  name: z.string().min(2, "Product name is required"),
 
-  sku: z.string().min(2),
+  sku: z.string().min(2, "SKU is required"),
 
-  category: z.string().min(2),
+  category: z.string().min(2, "Category is required"),
 
-  unitPrice: z.number().positive(),
+  unitPrice: z.number().positive("Unit price must be greater than 0"),
 
-  currentStock: z.number().int(),
+  currentStock: z.number().int().min(0),
 
-  minimumStock: z.number().int(),
+  minimumStock: z.number().int().min(0),
 
-  warehouseLocation: z.string().min(2),
+  warehouseLocation: z.string().min(2, "Warehouse location is required"),
 });
 
 export const updateProductSchema =

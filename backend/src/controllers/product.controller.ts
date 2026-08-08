@@ -13,6 +13,11 @@ import {
   updateProductSchema,
 } from "../validations/product.validation";
 
+console.log({
+  createProductSchema,
+  updateProductSchema,
+});
+
 export async function create(req: Request, res: Response) {
   try {
     const data = createProductSchema.parse(req.body);
@@ -42,11 +47,17 @@ export async function getAll(req: Request, res: Response) {
       success: true,
       data: products,
     });
-  } catch {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch products",
-    });
+  } catch (error) {
+  console.error(error);
+
+  return res.status(500).json({
+    success: false,
+    message:
+      error instanceof Error
+        ? error.message
+        : "Failed to fetch products",
+  });
+
   }
 }
 

@@ -9,3 +9,7 @@ export function generateToken(id: string, role: string) {
     { expiresIn: "7d" }
   );
 }
+
+export function verifyToken(token: string) {
+  return jwt.verify(token, JWT_SECRET);
+}

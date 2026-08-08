@@ -1,11 +1,6 @@
 import { Request, Response } from "express";
 
 import {
-  createProductSchema,
-  updateProductSchema,
-} from "../validations/product.validation";
-
-import {
   createProduct,
   getProducts,
   getProductById,
@@ -16,7 +11,7 @@ import {
 import {
   createProductSchema,
   updateProductSchema,
-} from "../validators/product.validator";
+} from "../validations/product.validation";
 
 export async function create(req: Request, res: Response) {
   try {
@@ -31,7 +26,10 @@ export async function create(req: Request, res: Response) {
   } catch (error) {
     return res.status(400).json({
       success: false,
-      message: error instanceof Error ? error.message : "Validation failed",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Validation failed",
     });
   }
 }
@@ -88,7 +86,10 @@ export async function update(req: Request, res: Response) {
   } catch (error) {
     return res.status(400).json({
       success: false,
-      message: error instanceof Error ? error.message : "Update failed",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Update failed",
     });
   }
 }

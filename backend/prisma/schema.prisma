@@ -38,11 +38,11 @@ enum ChallanStatus {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role
+  id       String @id @default(cuid())
+  name     String
+  email    String @unique
+  password String
+  role     Role
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -53,15 +53,15 @@ model User {
 }
 
 model Customer {
-  id            String   @id @default(cuid())
-  customerName  String
-  mobile        String   @unique
-  email         String?
-  businessName  String
-  gstNumber     String?
-  customerType  CustomerType
-  address       String
-  status        CustomerStatus
+  id           String         @id @default(cuid())
+  customerName String
+  mobile       String         @unique
+  email        String?
+  businessName String
+  gstNumber    String?
+  customerType CustomerType
+  address      String
+  status       CustomerStatus
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -79,15 +79,15 @@ model CustomerFollowUp {
   customer   Customer @relation(fields: [customerId], references: [id])
 
   createdById String
-  createdBy   User @relation(fields: [createdById], references: [id])
+  createdBy   User   @relation(fields: [createdById], references: [id])
 
   createdAt DateTime @default(now())
 }
 
 model Product {
-  id                String   @id @default(cuid())
+  id                String @id @default(cuid())
   name              String
-  sku               String   @unique
+  sku               String @unique
   category          String
   unitPrice         Float
   currentStock      Int
@@ -111,7 +111,7 @@ model StockMovement {
   product   Product @relation(fields: [productId], references: [id])
 
   createdById String
-  createdBy   User @relation(fields: [createdById], references: [id])
+  createdBy   User   @relation(fields: [createdById], references: [id])
 
   createdAt DateTime @default(now())
 }
@@ -121,23 +121,24 @@ model Challan {
   challanNumber  String         @unique
   status         ChallanStatus
   totalQuantity  Int
+  totalAmount    Float
 
-  customerId String
-  customer   Customer @relation(fields: [customerId], references: [id])
+  customerId     String
+  customer       Customer @relation(fields: [customerId], references: [id])
 
-  createdById String
-  createdBy   User @relation(fields: [createdById], references: [id])
+  createdById    String
+  createdBy      User @relation(fields: [createdById], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  items ChallanItem[]
+  items          ChallanItem[]
 }
 
 model ChallanItem {
-  id          String @id @default(cuid())
+  id String @id @default(cuid())
 
-  quantity    Int
+  quantity Int
 
   productName String
   sku         String

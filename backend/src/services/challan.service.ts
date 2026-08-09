@@ -43,10 +43,10 @@ export async function createChallan(data: CreateChallanInput) {
         throw new Error("Product not found");
       }
 
-      if (product.currentStock < item.quantity) {
-        throw new Error(
-          `${product.name} has insufficient stock`
-        );
+      // Stock is reserved/consumed only when the challan is confirmed.
+      // Draft and cancelled challans must not change inventory.
+      if (data.status === "CONFIRMED" && product.currentStock < item.quantity) {
+        throw new Error(`${product.name} has insufficient stock`);
       }
 
       totalQuantity += item.quantity;
@@ -81,16 +81,18 @@ export async function createChallan(data: CreateChallanInput) {
         },
       });
 
-      await tx.product.update({
-        where: {
-          id: item.productId,
-        },
-        data: {
-          currentStock: {
-            decrement: item.quantity,
+      if (data.status === "CONFIRMED") {
+        await tx.product.update({
+          where: {
+            id: item.productId,
           },
-        },
-      });
+          data: {
+            currentStock: {
+              decrement: item.quantity,
+            },
+          },
+        });
+      }
     }
 
     return tx.challan.findUnique({
@@ -113,6 +115,7 @@ export async function createChallan(data: CreateChallanInput) {
 
   });
 }
+
 export async function getAllChallans() {
   return prisma.challan.findMany({
     include: {
@@ -133,6 +136,7 @@ export async function getAllChallans() {
   });
 }
 
+
 export async function getChallanById(id: string) {
   return prisma.challan.findUnique({
     where: {
@@ -152,6 +156,7 @@ export async function getChallanById(id: string) {
     },
   });
 }
+
 export async function deleteChallan(id: string) {
   return prisma.$transaction(async (tx) => {
 
@@ -165,18 +170,20 @@ export async function deleteChallan(id: string) {
       throw new Error("Challan not found");
     }
 
-    // Restore stock
-    for (const item of challan.items) {
-      await tx.product.update({
-        where: {
-          id: item.productId,
-        },
-        data: {
-          currentStock: {
-            increment: item.quantity,
+    // Restore stock only if this challan previously consumed inventory.
+    if (challan.status === "CONFIRMED") {
+      for (const item of challan.items) {
+        await tx.product.update({
+          where: {
+            id: item.productId,
           },
-        },
-      });
+          data: {
+            currentStock: {
+              increment: item.quantity,
+            },
+          },
+        });
+      }
     }
 
     // Delete child items

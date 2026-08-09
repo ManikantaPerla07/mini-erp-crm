@@ -209,7 +209,21 @@ export default function Followups() {
         body: JSON.stringify(body),
       });
 
-      const result = await response.json();
+      const responseText = await response.text();
+
+console.log("FOLLOW-UP RESPONSE STATUS:", response.status);
+console.log("FOLLOW-UP RESPONSE URL:", response.url);
+console.log("FOLLOW-UP RESPONSE:", responseText);
+
+let result;
+
+try {
+  result = JSON.parse(responseText);
+} catch {
+  throw new Error(
+    `Server returned non-JSON response (${response.status}). Check the browser console.`
+  );
+}
 
       if (!response.ok) {
         throw new Error(result.message || "Failed to save follow-up");

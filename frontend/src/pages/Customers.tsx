@@ -16,6 +16,7 @@ import {
   Phone,
   Mail,
   MapPin,
+  CalendarDays,
   Pencil,
   Trash2,
   Eye,
@@ -54,6 +55,12 @@ const EMPTY_FORM: CreateCustomerPayload = {
   status: "ACTIVE",
 };
 
+type CustomerFollowup = {
+  id: string;
+  customerId: string;
+  note: string;
+  followupDate: string;
+};
 function getInitials(name: string) {
   return name
     .trim()
@@ -108,6 +115,29 @@ export default function Customers() {
     useState<Customer | null>(null);
   const [viewCustomer, setViewCustomer] =
     useState<Customer | null>(null);
+    const [customerFollowups, setCustomerFollowups] =
+    useState<CustomerFollowup[]>([]);
+
+  const [followupLoading, setFollowupLoading] =
+    useState(false);
+
+  const [followupModalOpen, setFollowupModalOpen] =
+    useState(false);
+
+  const [editingFollowupId, setEditingFollowupId] =
+    useState<string | null>(null);
+
+  const [followupNote, setFollowupNote] =
+    useState("");
+
+  const [followupDate, setFollowupDate] =
+    useState("");
+
+  const [followupSaving, setFollowupSaving] =
+    useState(false);
+
+  const [followupError, setFollowupError] =
+    useState("");
 
   const [form, setForm] =
     useState<CreateCustomerPayload>(EMPTY_FORM);
@@ -377,6 +407,243 @@ export default function Customers() {
     } finally {
       setDeleting(false);
     }
+  }
+    const API_BASE_URL =
+    import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+  function getAuthHeaders() {
+    const token = localStorage.getItem("token");
+
+    return {
+      "Content-Type": "application/json",
+      ...(token
+        ? { Authorization: `Bearer ${token}` }
+        : {}),
+    };
+  }
+
+  async function loadCustomerFollowups(customerId: string) {
+    try {
+      setFollowupLoading(true);
+      setFollowupError("");
+
+      const response = await fetch(
+        `${API_BASE_URL}/followups`,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message || "Failed to load follow-ups"
+        );
+      }
+
+      const allFollowups: CustomerFollowup[] =
+        result.data || [];
+
+      setCustomerFollowups(
+        allFollowups.filter(
+          (followup) =>
+            followup.customerId === customerId
+        )
+      );
+    } catch (err) {
+      setFollowupError(
+        err instanceof Error
+          ? err.message
+          : "Failed to load follow-ups"
+      );
+    } finally {
+      setFollowupLoading(false);
+    }
+  }
+
+  async function openCustomerDetails(customer: Customer) {
+    setViewCustomer(customer);
+    setFollowupModalOpen(false);
+    setCustomerFollowups([]);
+    await loadCustomerFollowups(customer.id);
+  }
+
+  function openCreateFollowup() {
+    setEditingFollowupId(null);
+    setFollowupNote("");
+    setFollowupDate("");
+    setFollowupError("");
+    setFollowupModalOpen(true);
+  }
+
+  function openEditFollowup(
+    followup: CustomerFollowup
+  ) {
+    const date = new Date(followup.followupDate);
+
+    const offset =
+      date.getTimezoneOffset();
+
+    const localDate = new Date(
+      date.getTime() -
+        offset * 60 * 1000
+    );
+
+    setEditingFollowupId(followup.id);
+    setFollowupNote(followup.note);
+    setFollowupDate(
+      localDate.toISOString().slice(0, 16)
+    );
+    setFollowupError("");
+    setFollowupModalOpen(true);
+  }
+
+  function closeFollowupModal() {
+    if (followupSaving) return;
+
+    setFollowupModalOpen(false);
+    setEditingFollowupId(null);
+    setFollowupNote("");
+    setFollowupDate("");
+    setFollowupError("");
+  }
+
+  async function handleFollowupSubmit(
+    event: React.FormEvent
+  ) {
+    event.preventDefault();
+
+    if (followupNote.trim().length < 3) {
+      setFollowupError(
+        "Note must be at least 3 characters."
+      );
+      return;
+    }
+
+    if (!followupDate) {
+      setFollowupError(
+        "Please select a follow-up date."
+      );
+      return;
+    }
+
+    if (!viewCustomer) return;
+
+    try {
+      setFollowupSaving(true);
+      setFollowupError("");
+
+      const body = editingFollowupId
+        ? {
+            note: followupNote.trim(),
+            followupDate:
+              new Date(
+                followupDate
+              ).toISOString(),
+          }
+        : {
+            customerId: viewCustomer.id,
+            note: followupNote.trim(),
+            followupDate:
+              new Date(
+                followupDate
+              ).toISOString(),
+          };
+
+      const url = editingFollowupId
+        ? `${API_BASE_URL}/followups/${editingFollowupId}`
+        : `${API_BASE_URL}/followups`;
+
+      const response = await fetch(url, {
+        method: editingFollowupId
+          ? "PUT"
+          : "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(body),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            "Failed to save follow-up"
+        );
+      }
+
+      closeFollowupModal();
+
+      await loadCustomerFollowups(
+        viewCustomer.id
+      );
+    } catch (err) {
+      setFollowupError(
+        err instanceof Error
+          ? err.message
+          : "Failed to save follow-up"
+      );
+    } finally {
+      setFollowupSaving(false);
+    }
+  }
+
+  async function handleDeleteFollowup(
+    followupId: string
+  ) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this follow-up?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/followups/${followupId}`,
+        {
+          method: "DELETE",
+          headers: getAuthHeaders(),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            "Failed to delete follow-up"
+        );
+      }
+
+      setCustomerFollowups(
+        (current) =>
+          current.filter(
+            (followup) =>
+              followup.id !== followupId
+          )
+      );
+    } catch (err) {
+      window.alert(
+        err instanceof Error
+          ? err.message
+          : "Failed to delete follow-up"
+      );
+    }
+  }
+
+  function formatFollowupDate(
+    dateString: string
+  ) {
+    return new Intl.DateTimeFormat(
+      "en-IN",
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }
+    ).format(new Date(dateString));
   }
 
   return (
@@ -662,7 +929,7 @@ export default function Customers() {
                           <div className="row-actions">
   <button
     title="View customer"
-    onClick={() => setViewCustomer(customer)}
+    onClick={() => openCustomerDetails(customer)}
   >
     <Eye size={16} />
   </button>
@@ -1164,6 +1431,107 @@ export default function Customers() {
                   </div>
                 </div>
               </div>
+                            <div className="customer-followups-section">
+                <div className="customer-followups-header">
+                  <div>
+                    <h3>Follow-ups</h3>
+                    <p>
+                      Customer activities and follow-up notes
+                    </p>
+                  </div>
+
+                  {isAdmin && (
+                    <button
+                      className="customer-followup-add"
+                      onClick={openCreateFollowup}
+                    >
+                      <Plus size={16} />
+                      Add follow-up
+                    </button>
+                  )}
+                </div>
+
+                {followupError && !followupModalOpen && (
+                  <div className="customer-followup-error">
+                    {followupError}
+                  </div>
+                )}
+
+                {followupLoading ? (
+                  <div className="customer-followup-empty">
+                    Loading follow-ups...
+                  </div>
+                ) : customerFollowups.length === 0 ? (
+                  <div className="customer-followup-empty">
+                    <CalendarDays size={24} />
+
+                    <strong>
+                      No follow-ups yet
+                    </strong>
+
+                    <span>
+                      Add a follow-up note to keep track
+                      of customer activities.
+                    </span>
+                  </div>
+                ) : (
+                  <div className="customer-followup-list">
+                    {customerFollowups.map(
+                      (followup) => (
+                        <div
+                          className="customer-followup-item"
+                          key={followup.id}
+                        >
+                          <div className="customer-followup-icon">
+                            <CalendarDays
+                              size={17}
+                            />
+                          </div>
+
+                          <div className="customer-followup-content">
+                            <strong>
+                              {formatFollowupDate(
+                                followup.followupDate
+                              )}
+                            </strong>
+
+                            <p>
+                              {followup.note}
+                            </p>
+                          </div>
+
+                          {isAdmin && (
+                            <div className="customer-followup-actions">
+                              <button
+                                title="Edit follow-up"
+                                onClick={() =>
+                                  openEditFollowup(
+                                    followup
+                                  )
+                                }
+                              >
+                                <Pencil size={15} />
+                              </button>
+
+                              <button
+                                title="Delete follow-up"
+                                className="danger"
+                                onClick={() =>
+                                  handleDeleteFollowup(
+                                    followup.id
+                                  )
+                                }
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
 
               <div className="modal-footer">
                 <button
@@ -1186,6 +1554,132 @@ export default function Customers() {
                   </button>
                 )}
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+            <AnimatePresence>
+        {followupModalOpen && (
+          <motion.div
+            className="customer-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onMouseDown={closeFollowupModal}
+          >
+            <motion.div
+              className="customer-modal"
+              initial={{
+                opacity: 0,
+                scale: 0.96,
+                y: 12,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                y: 0,
+              }}
+              exit={{
+                opacity: 0,
+                scale: 0.96,
+                y: 12,
+              }}
+              onMouseDown={(event) =>
+                event.stopPropagation()
+              }
+            >
+              <div className="modal-header">
+                <div>
+                  <div className="modal-icon">
+                    <CalendarDays size={20} />
+                  </div>
+
+                  <h2>
+                    {editingFollowupId
+                      ? "Edit follow-up"
+                      : "Add follow-up"}
+                  </h2>
+
+                  <p>
+                    {viewCustomer?.customerName}
+                  </p>
+                </div>
+
+                <button
+                  className="modal-close"
+                  onClick={closeFollowupModal}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {followupError && (
+                <div className="customers-alert error modal-alert">
+                  <AlertCircle size={17} />
+                  {followupError}
+                </div>
+              )}
+
+              <form
+                className="customer-form"
+                onSubmit={handleFollowupSubmit}
+              >
+                <div className="form-field">
+                  <label>
+                    Follow-up date <span>*</span>
+                  </label>
+
+                  <input
+                    type="datetime-local"
+                    value={followupDate}
+                    onChange={(event) =>
+                      setFollowupDate(
+                        event.target.value
+                      )
+                    }
+                  />
+                </div>
+
+                <div className="form-field">
+                  <label>
+                    Follow-up note <span>*</span>
+                  </label>
+
+                  <textarea
+                    value={followupNote}
+                    onChange={(event) =>
+                      setFollowupNote(
+                        event.target.value
+                      )
+                    }
+                    placeholder="e.g. Call customer regarding pending payment"
+                    rows={5}
+                  />
+                </div>
+
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="modal-cancel"
+                    onClick={closeFollowupModal}
+                    disabled={followupSaving}
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="modal-save"
+                    disabled={followupSaving}
+                  >
+                    {followupSaving
+                      ? "Saving..."
+                      : editingFollowupId
+                      ? "Save changes"
+                      : "Add follow-up"}
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </motion.div>
         )}

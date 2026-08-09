@@ -1,10 +1,4 @@
-Absolutely. I checked the **case-study PDF requirement by requirement** and built the README around the company's actual submission checklist, not just a generic project README.
 
-The case study specifically requires the GitHub repository, live frontend/backend URLs, credentials for all roles, Postman/API documentation, setup/deployment instructions, architecture explanation, assumptions, and known limitations.  It also requires the ERP/CRM modules, REST APIs, validation/error handling, deployment and environment-variable documentation.  
-
-Below is the **submission-ready README**. I have avoided claiming features that we haven't established. The only things you need to fill in are the **Sales/Warehouse/Accounts test credentials** and, if you create one, the **Postman collection path**.
-
-````markdown
 # Mini ERP + CRM Operations Portal
 
 A full-stack ERP + CRM operations portal developed as part of the **Full Stack Developer Case Study** for a wholesale/distribution business.
@@ -1637,27 +1631,4 @@ This project was developed as part of a Full Stack Developer case-study submissi
 
 Unless otherwise specified by the repository owner, the project should be treated as a case-study/portfolio project and not as a production ERP product for commercial redistribution.
 
-```
-
-### One important correction before you paste this
-
-There are **3 things I deliberately left as items you must finish**, because the PDF explicitly asks for them and I don't want your README to falsely claim they exist:
-
-1. **Four test accounts**
-   - Admin
-   - Sales
-   - Warehouse
-   - Accounts
-
-2. **Postman collection**
-   - Ideally put the JSON file inside `docs/postman/`.
-
-3. **Screenshots**
-   - Put the screenshots you already captured into `docs/screenshots/`.
-
-The PDF explicitly requires **test login credentials for all roles** and **a Postman collection or API documentation**, alongside the live URLs and README. :contentReference[oaicite:3]{index=3}
-
-Also, **do not publish `Admin@123` as a permanent credential** if that is currently an active account. Create dedicated submission/test accounts or change the password before making the repository/README public.
-
-This README now covers the company's requested **technical stack, required modules, API expectations, deployment, environment variables, server setup, local setup, architecture, assumptions, limitations, live links, credentials section, and API/Postman documentation section**. :contentReference[oaicite:4]{index=4} :contentReference[oaicite:5]{index=5}
 ```

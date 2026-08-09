@@ -4,29 +4,56 @@ import bcrypt from "bcrypt";
 const prisma = new PrismaClient();
 
 async function main() {
-  const existingAdmin = await prisma.user.findUnique({
-    where: {
-      email: "admin@erp.com",
-    },
-  });
-
-  if (existingAdmin) {
-    console.log("✅ Admin user already exists.");
-    return;
-  }
-
-  const hashedPassword = await bcrypt.hash("Admin@123", 10);
-
-  await prisma.user.create({
-    data: {
+  const users = [
+    {
       name: "System Administrator",
       email: "admin@erp.com",
-      password: hashedPassword,
+      password: "Admin@123",
       role: Role.ADMIN,
     },
-  });
+    {
+      name: "Sales User",
+      email: "sales@erp.com",
+      password: "Sales@123",
+      role: Role.SALES,
+    },
+    {
+      name: "Warehouse User",
+      email: "warehouse@erp.com",
+      password: "Warehouse@123",
+      role: Role.WAREHOUSE,
+    },
+    {
+      name: "Accounts User",
+      email: "accounts@erp.com",
+      password: "Accounts@123",
+      role: Role.ACCOUNTS,
+    },
+  ];
 
-  console.log("✅ Admin user created successfully.");
+  for (const user of users) {
+    const existingUser = await prisma.user.findUnique({
+      where: { email: user.email },
+    });
+
+    if (existingUser) {
+      console.log(`User already exists: ${user.email}`);
+      continue;
+    }
+
+    const hashedPassword = await bcrypt.hash(user.password, 10);
+
+    await prisma.user.create({
+      data: {
+        name: user.name,
+        email: user.email,
+        password: hashedPassword,
+        role: user.role,
+      },
+    });
+
+    console.log(`Created: ${user.email} (${user.role})`);
+  }
 }
 
 main()

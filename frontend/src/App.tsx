@@ -28,6 +28,7 @@ import Products from "./pages/Products";
 import Inventory from "./pages/Inventory";
 import Challans from "./Challans";
 import Followups from "./pages/Followups";
+import Reports from "./pages/Reports";
 
 type NavItem = {
   label: string;
@@ -339,13 +340,16 @@ function App() {
 
   {activePath === "/followups" && <Followups />}
 
+  {activePath === "/reports" && <Reports />}
+
 
   {activePath !== "/" &&
     activePath !== "/customers" &&
     activePath !== "/products" &&
     activePath !== "/inventory" &&
     activePath !== "/challans" && 
-    activePath !== "/followups" && (
+    activePath !== "/followups" &&
+     activePath !== "/reports" &&  (
       <div className="dashboard-error">
         <div className="error-icon">
           <AlertTriangle size={25} />

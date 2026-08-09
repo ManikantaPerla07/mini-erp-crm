@@ -1,5 +1,6 @@
 import { UserCircle, Mail, ShieldCheck } from "lucide-react";
 import "./Profile.css";
+
 export default function Profile() {
   const storedUser = localStorage.getItem("user");
 

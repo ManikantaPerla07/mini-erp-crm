@@ -21,7 +21,7 @@ router.get("/:id", authenticate, getOne);
 router.post(
   "/",
   authenticate,
-  authorize(Role.ADMIN),
+  authorize(Role.ADMIN, Role.SALES),
   create
 );
 

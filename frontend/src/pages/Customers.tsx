@@ -18,6 +18,7 @@ import {
   MapPin,
   Pencil,
   Trash2,
+  Eye,
   X,
   ChevronDown,
   UserRound,
@@ -104,6 +105,8 @@ export default function Customers() {
     useState<Customer | null>(null);
 
   const [deleteTarget, setDeleteTarget] =
+    useState<Customer | null>(null);
+  const [viewCustomer, setViewCustomer] =
     useState<Customer | null>(null);
 
   const [form, setForm] =
@@ -657,19 +660,24 @@ export default function Customers() {
                       {isAdmin && (
                         <td>
                           <div className="row-actions">
-                            <button
-                              title="Edit customer"
-                              onClick={() =>
-                                openEditModal(
-                                  customer
-                                )
-                              }
-                            >
-                              <Pencil size={16} />
-                            </button>
+  <button
+    title="View customer"
+    onClick={() => setViewCustomer(customer)}
+  >
+    <Eye size={16} />
+  </button>
 
-                            <button
-                              title="Delete customer"
+  <button
+    title="Edit customer"
+    onClick={() =>
+      openEditModal(customer)
+    }
+  >
+    <Pencil size={16} />
+  </button>
+
+  <button
+    title="Delete customer"
                               className="danger"
                               onClick={() =>
                                 setDeleteTarget(
@@ -1021,6 +1029,167 @@ export default function Customers() {
           </motion.div>
         )}
       </AnimatePresence>
+            <AnimatePresence>
+        {viewCustomer && (
+          <motion.div
+            className="customer-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onMouseDown={() => setViewCustomer(null)}
+          >
+            <motion.div
+              className="customer-detail-modal"
+              initial={{
+                opacity: 0,
+                scale: 0.96,
+                y: 12,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                y: 0,
+              }}
+              exit={{
+                opacity: 0,
+                scale: 0.96,
+                y: 12,
+              }}
+              transition={{ duration: 0.2 }}
+              onMouseDown={(event) =>
+                event.stopPropagation()
+              }
+            >
+              <div className="modal-header">
+                <div>
+                  <div className="modal-icon">
+                    <UserRound size={20} />
+                  </div>
+
+                  <h2>{viewCustomer.customerName}</h2>
+
+                  <p>
+                    Customer profile and business information
+                  </p>
+                </div>
+
+                <button
+                  className="modal-close"
+                  onClick={() => setViewCustomer(null)}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="customer-detail-body">
+                <div className="customer-detail-hero">
+                  <div className="customer-detail-avatar">
+                    {getInitials(
+                      viewCustomer.customerName
+                    )}
+                  </div>
+
+                  <div>
+                    <h3>
+                      {viewCustomer.customerName}
+                    </h3>
+
+                    <span
+                      className={`customer-status-badge ${viewCustomer.status.toLowerCase()}`}
+                    >
+                      <span />
+                      {statusLabel(viewCustomer.status)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="customer-detail-grid">
+                  <DetailItem
+                    label="Business"
+                    value={viewCustomer.businessName}
+                    icon={<Building2 size={17} />}
+                  />
+
+                  <DetailItem
+                    label="Customer type"
+                    value={typeLabel(
+                      viewCustomer.customerType
+                    )}
+                    icon={<Users size={17} />}
+                  />
+
+                  <DetailItem
+                    label="Mobile"
+                    value={viewCustomer.mobile}
+                    icon={<Phone size={17} />}
+                  />
+
+                  <DetailItem
+                    label="Email"
+                    value={
+                      viewCustomer.email ||
+                      "Not provided"
+                    }
+                    icon={<Mail size={17} />}
+                  />
+
+                  <DetailItem
+                    label="GST number"
+                    value={
+                      viewCustomer.gstNumber ||
+                      "Not provided"
+                    }
+                    icon={<Building2 size={17} />}
+                  />
+
+                  <DetailItem
+                    label="Added on"
+                    value={formatDate(
+                      viewCustomer.createdAt
+                    )}
+                    icon={<CheckCircle2 size={17} />}
+                  />
+
+                  <div className="customer-detail-item full">
+                    <div className="detail-item-icon">
+                      <MapPin size={17} />
+                    </div>
+
+                    <div>
+                      <span>Address</span>
+                      <strong>
+                        {viewCustomer.address}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button
+                  className="modal-cancel"
+                  onClick={() => setViewCustomer(null)}
+                >
+                  Close
+                </button>
+
+                {isAdmin && (
+                  <button
+                    className="modal-save"
+                    onClick={() => {
+                      setViewCustomer(null);
+                      openEditModal(viewCustomer);
+                    }}
+                  >
+                    <Pencil size={16} />
+                    Edit customer
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -1240,6 +1409,34 @@ function EmptyCustomers({
             Add customer
           </button>
         )}
+      </div>
+    </div>
+  );
+}
+function DetailItem({
+  label,
+  value,
+  icon,
+  full,
+}: {
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+  full?: boolean;
+}) {
+  return (
+    <div
+      className={`customer-detail-item ${
+        full ? "full" : ""
+      }`}
+    >
+      <div className="detail-item-icon">
+        {icon}
+      </div>
+
+      <div>
+        <span>{label}</span>
+        <strong>{value}</strong>
       </div>
     </div>
   );

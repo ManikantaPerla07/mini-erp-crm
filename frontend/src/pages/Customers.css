@@ -918,3 +918,125 @@
     max-height: calc(100vh - 20px);
   }
 }
+
+/* Customer detail modal */
+
+.customer-detail-modal {
+  width: min(720px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: white;
+  border-radius: 20px;
+  box-shadow:
+    0 30px 90px rgba(15, 20, 45, 0.25);
+}
+
+.customer-detail-body {
+  padding: 25px;
+}
+
+.customer-detail-hero {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 18px;
+  margin-bottom: 22px;
+  border: 1px solid #eceef5;
+  border-radius: 15px;
+  background: #fafaff;
+}
+
+.customer-detail-avatar {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #614af0;
+  background: linear-gradient(
+    145deg,
+    #eeeaff,
+    #e2ddff
+  );
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.customer-detail-hero h3 {
+  margin: 0 0 9px;
+  color: #1b2034;
+  font-size: 20px;
+}
+
+.customer-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.customer-detail-item {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #edf0f5;
+  border-radius: 12px;
+  background: #fcfdff;
+}
+
+.customer-detail-item.full {
+  grid-column: 1 / -1;
+  align-items: flex-start;
+}
+
+.detail-item-icon {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6650f6;
+  background: #eeebff;
+}
+
+.customer-detail-item div:last-child {
+  min-width: 0;
+}
+
+.customer-detail-item span {
+  display: block;
+  margin-bottom: 5px;
+  color: #9299aa;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.customer-detail-item strong {
+  display: block;
+  color: #30364a;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+@media (max-width: 700px) {
+  .customer-detail-modal {
+    max-height: calc(100vh - 20px);
+  }
+
+  .customer-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-detail-item.full {
+    grid-column: auto;
+  }
+}

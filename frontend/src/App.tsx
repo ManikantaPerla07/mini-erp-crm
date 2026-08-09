@@ -30,6 +30,8 @@ import Challans from "./Challans";
 import Followups from "./pages/Followups";
 import Reports from "./pages/Reports";
 import SettingsPage from "./pages/Settings";
+import Profile from "./pages/Profile";
+
 
 type NavItem = {
   label: string;
@@ -301,15 +303,21 @@ function App() {
                       scale: 0.97,
                     }}
                   >
-                    <button>
-                      <UserCircle size={17} />
-                      My Profile
-                    </button>
+                    <button
+  className="profile-menu-item"
+  onClick={() => handleNavigation("/profile")}
+>
+  <UserCircle size={18} />
+  <span>My Profile</span>
+</button>
 
-                    <button>
-                      <Settings size={17} />
-                      Settings
-                    </button>
+                    <button
+  className="profile-menu-item"
+  onClick={() => handleNavigation("/settings")}
+>
+  <Settings size={18} />
+  <span>Settings</span>
+</button>
 
                     <div className="profile-menu-divider" />
 
@@ -344,6 +352,8 @@ function App() {
   {activePath === "/reports" && <Reports />}
 
   {activePath === "/settings" && <SettingsPage />}
+
+  {activePath === "/profile" && <Profile />}
 
 
   {activePath !== "/" &&

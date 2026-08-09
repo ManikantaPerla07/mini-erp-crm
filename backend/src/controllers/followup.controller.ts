@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+
 import {
   createFollowup,
   getAllFollowups,
@@ -6,6 +7,7 @@ import {
   updateFollowup,
   deleteFollowup,
 } from "../services/followup.service";
+
 import {
   createFollowupSchema,
   updateFollowupSchema,
@@ -15,9 +17,16 @@ export async function create(req: Request, res: Response) {
   try {
     const data = createFollowupSchema.parse(req.body);
 
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
     const followup = await createFollowup({
       ...data,
-      createdById: req.user!.id,
+      createdById: req.user.id,
     });
 
     return res.status(201).json({
@@ -28,43 +37,78 @@ export async function create(req: Request, res: Response) {
     return res.status(400).json({
       success: false,
       message:
-        error instanceof Error ? error.message : "Failed to create follow-up",
+        error instanceof Error
+          ? error.message
+          : "Failed to create follow-up",
     });
   }
 }
 
-export async function getAll(req: Request, res: Response) {
-  const followups = await getAllFollowups();
+export async function getAll(_req: Request, res: Response) {
+  try {
+    const followups = await getAllFollowups();
 
-  return res.json({
-    success: true,
-    data: followups,
-  });
+    return res.status(200).json({
+      success: true,
+      data: followups,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch follow-ups",
+    });
+  }
 }
 
 export async function getOne(req: Request, res: Response) {
-  const followup = await getFollowupById(req.params.id as string as string);
+  try {
+    const id = req.params.id as string;
 
-  if (!followup) {
-    return res.status(404).json({
+    const followup = await getFollowupById(id);
+
+    if (!followup) {
+      return res.status(404).json({
+        success: false,
+        message: "Follow-up not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: followup,
+    });
+  } catch (error) {
+    return res.status(500).json({
       success: false,
-      message: "Follow-up not found",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch follow-up",
     });
   }
-
-  return res.json({
-    success: true,
-    data: followup,
-  });
 }
 
 export async function update(req: Request, res: Response) {
   try {
+    const id = req.params.id as string;
+
     const data = updateFollowupSchema.parse(req.body);
 
-    const followup = await updateFollowup(req.params.id as string as string, data);
+    const existingFollowup = await getFollowupById(id);
 
-    return res.json({
+    if (!existingFollowup) {
+      return res.status(404).json({
+        success: false,
+        message: "Follow-up not found",
+      });
+    }
+
+    const followup = await updateFollowup(id, data);
+
+    return res.status(200).json({
       success: true,
       data: followup,
     });
@@ -72,16 +116,39 @@ export async function update(req: Request, res: Response) {
     return res.status(400).json({
       success: false,
       message:
-        error instanceof Error ? error.message : "Failed to update follow-up",
+        error instanceof Error
+          ? error.message
+          : "Failed to update follow-up",
     });
   }
 }
 
 export async function remove(req: Request, res: Response) {
-  await deleteFollowup(req.params.id as string as string);
+  try {
+    const id = req.params.id as string;
 
-  return res.json({
-    success: true,
-    message: "Follow-up deleted successfully",
-  });
+    const existingFollowup = await getFollowupById(id);
+
+    if (!existingFollowup) {
+      return res.status(404).json({
+        success: false,
+        message: "Follow-up not found",
+      });
+    }
+
+    await deleteFollowup(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Follow-up deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to delete follow-up",
+    });
+  }
 }
